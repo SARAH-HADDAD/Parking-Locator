@@ -112,8 +112,13 @@ class _HomeState extends State<Home> {
             height: MediaQuery.of(context).size.height/3,
             width: MediaQuery.of(context).size.width,
             child: GoogleMap(
+              markers: {Marker(markerId:MarkerId('_kGooglePlex'),
+                infoWindow: InfoWindow(title: 'Google Plex'),
+                icon: BitmapDescriptor.defaultMarker,
+                position: LatLng(lat,long),
+              )},
               initialCameraPosition:CameraPosition(
-                target: LatLng(long,lat),
+                target: LatLng(lat,long),
                 zoom: 14.4746,
 
               ),
