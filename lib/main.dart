@@ -1,8 +1,11 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-
+import 'models/place.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert' as convert;
 void main() {
   runApp(MyApp());
 }
@@ -27,8 +30,10 @@ class _HomeState extends State<Home> {
   bool haspermission = false;
   late LocationPermission permission;
   late Position position;
+  //=Position(longitude: 3.05997, latitude: 36.7762, timestamp: null, accuracy: null, altitude: null, heading: null, speed: null, speedAccuracy: null);
   double long = 3.05997, lat =36.7762;
   late StreamSubscription<Position> positionStream;
+  final key = 'AIzaSyAPESixyiDS-Ag-_tYl19IxqiMaK-PAANY';
 
 
   @override
@@ -78,7 +83,6 @@ class _HomeState extends State<Home> {
     position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
     long = position.longitude;
     lat = position.latitude;
-
     setState(() {
       //refresh UI
     });
@@ -100,12 +104,19 @@ class _HomeState extends State<Home> {
       });
     });
   }
-
+  Future<List<Place>> getPlaces(double lat, double lng) async {
+    var url = Uri.parse('https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=36.7762,3.05997&rankby=distance&type=parking&key=AIzaSyAPESixyiDS-Ag-_tYl19IxqiMaK-PAANY');
+    http.Response response = await http.get(url);
+    var json = convert.jsonDecode(response.body);
+    var jsonResults = json['results'] as List;
+    return jsonResults.map((place) => Place.fromJson(place)).toList();
+  }
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return
+       Scaffold(
         body: Column(children:<Widget> [
-          Container(
+        if (long != 3.05997) Container(
             height: MediaQuery.of(context).size.height/3,
             width: MediaQuery.of(context).size.width,
             child: GoogleMap(
@@ -119,8 +130,8 @@ class _HomeState extends State<Home> {
                 zoom: 14.4746,
 
               ),
-            ),
-          )
+            )
+          ) else Text("wait")
         ],
         )
     );
