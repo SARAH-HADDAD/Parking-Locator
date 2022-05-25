@@ -27,8 +27,9 @@ class _HomeState extends State<Home> {
   bool haspermission = false;
   late LocationPermission permission;
   late Position position;
-  double long = 0, lat = 0;
+  double long = 3.05997, lat =36.7762;
   late StreamSubscription<Position> positionStream;
+
 
   @override
   void initState() {
@@ -103,10 +104,6 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-            title: Text("Parking App"),
-            backgroundColor: Colors.redAccent
-        ),
         body: Column(children:<Widget> [
           Container(
             height: MediaQuery.of(context).size.height/3,
@@ -115,10 +112,10 @@ class _HomeState extends State<Home> {
               markers: {Marker(markerId:MarkerId('_kGooglePlex'),
                 infoWindow: InfoWindow(title: 'Google Plex'),
                 icon: BitmapDescriptor.defaultMarker,
-                position: LatLng(lat,long),
+                position: LatLng(position.latitude,position.longitude),
               )},
               initialCameraPosition:CameraPosition(
-                target: LatLng(lat,long),
+                target: LatLng(position.latitude,position.longitude),
                 zoom: 14.4746,
 
               ),
@@ -129,4 +126,3 @@ class _HomeState extends State<Home> {
     );
   }
 }
-
