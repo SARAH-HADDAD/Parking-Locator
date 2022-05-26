@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'models/place.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert' as convert;
 void main() {
@@ -104,36 +103,118 @@ class _HomeState extends State<Home> {
       });
     });
   }
-  Future<List<Place>> getPlaces(double lat, double lng) async {
-    var url = Uri.parse('https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=36.7762,3.05997&rankby=distance&type=parking&key=AIzaSyAPESixyiDS-Ag-_tYl19IxqiMaK-PAANY');
-    http.Response response = await http.get(url);
-    var json = convert.jsonDecode(response.body);
-    var jsonResults = json['results'] as List;
-    return jsonResults.map((place) => Place.fromJson(place)).toList();
+  Future<Map> getData() async{
+    String api = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=36.7762,3.05997&rankby=distance&keyword=parking&type=parking&key=AIzaSyAPESixyiDS-Ag-_tYl19IxqiMaK-PAANY";
+    http.Response response = await http.get(Uri.parse(api));
+
+    return json.decode(response.body);
   }
   @override
   Widget build(BuildContext context) {
+    String api = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=36.7762,3.05997&rankby=distance&keyword=parking&type=parking&key=AIzaSyAPESixyiDS-Ag-_tYl19IxqiMaK-PAANY";
+    double width = MediaQuery.of(context).size.width;
     return
-       Scaffold(
-        body: Column(children:<Widget> [
-        if (long != 3.05997) Container(
-            height: MediaQuery.of(context).size.height/3,
-            width: MediaQuery.of(context).size.width,
-            child: GoogleMap(
-              markers: {Marker(markerId:MarkerId('_kGooglePlex'),
-                infoWindow: InfoWindow(title: 'Google Plex'),
-                icon: BitmapDescriptor.defaultMarker,
-                position: LatLng(position.latitude,position.longitude),
-              )},
-              initialCameraPosition:CameraPosition(
-                target: LatLng(position.latitude,position.longitude),
-                zoom: 14.4746,
+      Scaffold(
+          body:SingleChildScrollView(
+          child : Column(children:<Widget> [
+            if (long != 3.05997) Container(
+                height: MediaQuery.of(context).size.height/3,
+                width: MediaQuery.of(context).size.width,
+                child: GoogleMap(
+                  markers: {Marker(markerId:MarkerId('_kGooglePlex'),
+                    infoWindow: InfoWindow(title: 'Google Plex'),
+                    icon: BitmapDescriptor.defaultMarker,
+                    position: LatLng(position.latitude,position.longitude),
+                  )},
+                  initialCameraPosition:CameraPosition(
+                    target: LatLng(position.latitude,position.longitude),
+                    zoom: 14.4746,
 
-              ),
-            )
-          ) else Text("wait")
-        ],
-        )
-    );
+                  ),
+                )
+            ) else Text("wait"),
+            ParkingGetter(width),
+          ],
+          )
+          )
+      );
   }
+  FutureBuilder<Map<dynamic, dynamic>> ParkingGetter(double width) {
+    return FutureBuilder(
+        future: getData(),
+        builder: (BuildContext context, AsyncSnapshot<Map> snapshot ){
+          //Whare we get all JSON data, we set up widgets
+          if(snapshot.hasData)
+          {
+            // return Text(snapshot.data.toString());
+
+            return ListView.builder(
+              physics: const NeverScrollableScrollPhysics(), // this to make the list view non scrollable
+              shrinkWrap: true, // this to tell the list view tahkem un minimum de place au cas ou thewsi tefehmi kollech mdrr
+              itemCount: snapshot.data!["results"].length,
+              itemBuilder: (context, index) {
+                // String parking = snapshot.data!["results"][index];
+                return Column(
+                  children: [
+
+                    SizedBox(
+                        height: 150,
+                        width: width,
+                        child: Padding(
+                          padding: const EdgeInsets.all(1.0),
+                          child: Card(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 10, top: 10),
+                                  child: Text(
+                                    snapshot.data!["results"][index]["name"],
+                                    style: const TextStyle(
+                                      fontSize: 20,
+                                    ),
+                                  ),
+                                ),
+
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 10, top: 10),
+                                  child: Text(
+                                    "Rating = ${snapshot.data!["results"][index]["rating"].toString()}",
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ),
+
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 10, top: 5, bottom: 10),
+                                  child: Text(
+                                    snapshot.data!["results"][index]["vicinity"],
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                    ),
+                    const SizedBox(height: 15,),
+                    // Widget to display the list of project
+                  ],
+                );
+              },
+            );
+
+          }
+          else
+          {
+            return const Text("Error 404",
+              style: TextStyle(color: Colors.white, fontSize: 25, fontWeight: FontWeight.w600 ),
+            );
+          }
+        });}
 }
