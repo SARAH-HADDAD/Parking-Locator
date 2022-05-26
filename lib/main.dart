@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert' as convert;
+
 void main() {
   runApp(MyApp());
 }
@@ -29,7 +29,7 @@ class _HomeState extends State<Home> {
   bool haspermission = false;
   late LocationPermission permission;
   late Position position;
-  //=Position(longitude: 3.05997, latitude: 36.7762, timestamp: null, accuracy: null, altitude: null, heading: null, speed: null, speedAccuracy: null);
+  //=Position(longitude: 3.05997, 36.7762, timestamp: null, accuracy: null, altitude: null, heading: null, speed: null, speedAccuracy: null);
   double long = 3.05997, lat =36.7762;
   late StreamSubscription<Position> positionStream;
   final key = 'AIzaSyAPESixyiDS-Ag-_tYl19IxqiMaK-PAANY';
@@ -109,6 +109,7 @@ class _HomeState extends State<Home> {
 
     return json.decode(response.body);
   }
+
   @override
   Widget build(BuildContext context) {
     String api = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=36.7762,3.05997&rankby=distance&keyword=parking&type=parking&key=AIzaSyAPESixyiDS-Ag-_tYl19IxqiMaK-PAANY";
@@ -158,7 +159,7 @@ class _HomeState extends State<Home> {
                   children: [
 
                     SizedBox(
-                        height: 150,
+                        height: 200,
                         width: width,
                         child: Padding(
                           padding: const EdgeInsets.all(1.0),
@@ -181,17 +182,25 @@ class _HomeState extends State<Home> {
                                 Padding(
                                   padding: const EdgeInsets.only(left: 10, top: 10),
                                   child: Text(
-                                    "Rating = ${snapshot.data!["results"][index]["rating"].toString()}",
+                                    "Rating = ${snapshot.data!["results"][index]["rating"].toString()} (${snapshot.data!["results"][index]["user_ratings_total"].toString()})",
                                     style: const TextStyle(
                                       fontSize: 14,
                                     ),
                                   ),
                                 ),
-
                                 Padding(
-                                  padding: const EdgeInsets.only(left: 10, top: 5, bottom: 10),
+                                  padding: const EdgeInsets.only(left: 10, top: 10),
                                   child: Text(
                                     snapshot.data!["results"][index]["vicinity"],
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 10, top: 10),
+                                  child:Text(
+                                    "${Geolocator.distanceBetween(36.7762,3.05997, snapshot.data!["results"][index]["geometry"]["location"]["lat"],snapshot.data!["results"][index]["geometry"]["location"]["lng"])} Meters",
                                     style: const TextStyle(
                                       fontSize: 14,
                                     ),
